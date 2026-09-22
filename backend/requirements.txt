@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pymongo
+python-dotenv
+groq
+python-multipart
+Pillow
+
+transformers
+torch
+faiss-cpu
+huggingface_hub
+numpy

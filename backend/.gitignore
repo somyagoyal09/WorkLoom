@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+reference_library/images/
+reference_library/faiss.index
+reference_library/metadata.json
+uploads/
+_dataset_images/
