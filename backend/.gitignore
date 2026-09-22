@@ -8,3 +8,5 @@ reference_library/faiss.index
 reference_library/metadata.json
 uploads/
 _dataset_images/
+
+reference_library/
