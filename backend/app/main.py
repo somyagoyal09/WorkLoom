@@ -11,16 +11,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.database import create_indexes
-from app.routes import health, orders, uploads, voice, notifications, auth, analytics, customer, team, reference_images, issues
+from app.routes import (
+    health,
+    orders,
+    uploads,
+    voice,
+    notifications,
+    auth,
+    analytics,
+    customer,
+    team,
+    reference_images,
+    issues,
+)
+from download_reference_library import ensure_reference_library
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Runs once when the server starts up — a good place for one-time
-    # setup like making sure our MongoDB indexes exist.
+    # Runs once when the server starts up.
     create_indexes()
+    ensure_reference_library()
     yield
-    # (nothing to clean up on shutdown yet)
+    # Nothing to clean up on shutdown yet.
 
 
 app = FastAPI(
@@ -43,18 +56,33 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["Health"])
 app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
 app.include_router(voice.router, prefix="/api/voice", tags=["Voice & AI"])
-app.include_router(reference_images.router, prefix="/api/voice", tags=["Design References"])
+app.include_router(
+    reference_images.router,
+    prefix="/api/voice",
+    tags=["Design References"],
+)
 app.include_router(uploads.router, prefix="/api/uploads", tags=["Uploads"])
-app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(
+    notifications.router,
+    prefix="/api/notifications",
+    tags=["Notifications"],
+)
 app.include_router(issues.router, prefix="/api/issues", tags=["Karigar Questions"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
-app.include_router(customer.router, prefix="/api/customer", tags=["Customer Communication"])
+app.include_router(
+    customer.router,
+    prefix="/api/customer",
+    tags=["Customer Communication"],
+)
 app.include_router(team.router, prefix="/api/team", tags=["Workshop Team"])
 
-# Local MVP storage for uploaded design references. For production deployment,
-# this can be swapped for Cloudinary without changing the order API contract.
-app.mount("/uploads", StaticFiles(directory=str(uploads.UPLOAD_DIR)), name="uploads")
+# Local MVP storage for uploaded design references.
+app.mount(
+    "/uploads",
+    StaticFiles(directory=str(uploads.UPLOAD_DIR)),
+    name="uploads",
+)
 
 
 @app.get("/")
