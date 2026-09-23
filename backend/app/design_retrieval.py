@@ -13,10 +13,7 @@ LIBRARY_DIR = Path(os.getenv("WORKLOOM_REFERENCE_LIBRARY", BASE_DIR / "reference
 IMAGE_DIR = LIBRARY_DIR / "images"
 INDEX_PATH = LIBRARY_DIR / "faiss.index"
 META_PATH = LIBRARY_DIR / "metadata.json"
-MODEL_ID = os.getenv(
-    "WORKLOOM_CLIP_MODEL",
-    str(BASE_DIR / "reference_library" / "clip_model"),
-)
+MODEL_ID = os.getenv("WORKLOOM_CLIP_MODEL", "openai/clip-vit-base-patch32")
 
 _model = None
 _processor = None
