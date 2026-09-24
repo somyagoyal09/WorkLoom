@@ -175,11 +175,15 @@ async def transcribe_audio(file: UploadFile = File(...)):
 def extract_order_fields(payload: ExtractRequest):
     """Extract structured jewellery order fields from the transcript using Groq."""
     if not payload.transcript.strip():
-        raise HTTPException(status_code=400, detail='Transcript cannot be empty.')
+        raise HTTPException(
+            status_code=400,
+            detail='Transcript cannot be empty.'
+        )
 
     try:
         client = _get_client()
         import json
+
         response = client.chat.completions.create(
             model='openai/gpt-oss-20b',
             temperature=0,
@@ -188,69 +192,150 @@ def extract_order_fields(payload: ExtractRequest):
                 {
                     'role': 'system',
                     'content': (
-                        'You extract jewellery workshop order information from natural spoken language. Return JSON with two top-level keys: fields and validation. '
-                        'fields must contain exactly: customer_name, item, material, weight, stones, karigar, priority, due_date, advance, estimate_value, notes. '
-                        'Use null when a value is not present. Never invent values. Keep numeric fields numeric when clearly stated. '
-                        'ITEM RULES: normalize common jewellery words to title case (ring, necklace, bracelet, bangle, pendant, chain, anklet, nose pin, mangalsutra). '
-                        'MATERIAL RULES: preserve metal and purity, e.g. 18k gold -> Gold 18K, 22 carat gold -> Gold 22K. '
-                        'STONE RULES: explicitly extract every named stone/material from the transcript. If the transcript says diamond, diamonds, diamond ring, solitaire diamond, ruby, emerald, sapphire, kundan, polki, pearl, or cubic zirconia, populate stones with the named stone; do not leave stones null when a stone is explicitly mentioned. '
-                        'DESIGN NOTES RULES: notes should be a concise, complete brief for the karigar. Include the jewellery item and any explicitly named stone when they are relevant to the design, followed by the actual design/manufacturing requirements stated by the customer, especially adjectives, shape, thickness, style, setting, finish, engraving, pattern, stone placement, and other visual constraints. Avoid duplicating material and weight when those are already separate structured fields. For example, for "sleek diamond ring, very thin metal body, approximately 6 grams, gold 18k", notes should include "Diamond ring; sleek; very thin metal body" and stones should be Diamond. '
-                        'If multiple distinct design requirements are present, combine them into one concise notes string separated by semicolons. Do not invent design requirements. '
-                        'validation must contain missing_fields (array of important fields missing for production), confidence (object mapping each field to a number 0-1), warnings (array of short warnings), and needs_review (boolean). Treat customer_name, item, material, weight, and due_date as core fields. '
-                        'If a core field is absent, needs_review must be true. Confidence must reflect how explicitly the transcript supports the value.'
+                        'You extract jewellery workshop order information from natural spoken language. '
+                        'Return JSON with two top-level keys: fields and validation. '
+
+                        'fields must contain exactly: customer_name, item, material, weight, stones, '
+                        'karigar, priority, due_date, advance, estimate_value, notes. '
+
+                        'Use null when a value is not present. Never invent values. '
+                        'Keep numeric fields numeric when clearly stated. '
+
+                        'ITEM RULES: normalize common jewellery words to title case '
+                        '(ring, necklace, bracelet, bangle, pendant, chain, anklet, nose pin, mangalsutra). '
+
+                        'MATERIAL RULES: preserve metal and purity, e.g. 18k gold -> Gold 18K, '
+                        '22 carat gold -> Gold 22K. '
+
+                        'STONE RULES: explicitly extract every named stone/material from the transcript. '
+                        'If the transcript says diamond, diamonds, diamond ring, solitaire diamond, '
+                        'ruby, emerald, sapphire, kundan, polki, pearl, or cubic zirconia, populate '
+                        'stones with the named stone; do not leave stones null when a stone is explicitly mentioned. '
+
+                        'DESIGN NOTES RULES: notes should contain ONLY the actual design or manufacturing '
+                        'requirements stated by the customer. Do NOT repeat the jewellery item, stone, '
+                        'material, purity, or weight in notes because these are stored separately. '
+
+                        'Focus notes on adjectives, shape, thickness, style, setting, finish, engraving, '
+                        'pattern, stone placement, gender/use-case, and other visual or manufacturing constraints. '
+
+                        'For example, for "sleek diamond ring, very thin metal body, approximately 6 grams, '
+                        'gold 18k", notes should be "sleek; very thin metal body" and stones should be Diamond. '
+
+                        'If multiple distinct design requirements are present, combine them into one concise '
+                        'notes string separated by semicolons. Do not invent design requirements. '
+
+                        'validation must contain missing_fields, confidence, warnings, and needs_review. '
+                        'Treat customer_name, item, material, weight, and due_date as core fields. '
+                        'If a core field is absent, needs_review must be true. '
+                        'Confidence must reflect how explicitly the transcript supports the value.'
                     ),
                 },
-                {'role': 'user', 'content': payload.transcript},
+                {
+                    'role': 'user',
+                    'content': payload.transcript,
+                },
             ],
         )
+
         content = response.choices[0].message.content or '{}'
         result = json.loads(content)
+
         fields = result.get('fields') or {}
         validation = result.get('validation') or {}
 
-        # Deterministic safety net for common jewellery terms so explicit spoken
-        # stone mentions are not lost if the LLM under-extracts them.
         transcript_lower = payload.transcript.lower()
+
+        # Safety net for explicitly mentioned stones
         stone_terms = [
-            ('diamond', 'Diamond'), ('ruby', 'Ruby'), ('emerald', 'Emerald'),
-            ('sapphire', 'Sapphire'), ('kundan', 'Kundan'), ('polki', 'Polki'),
-            ('pearl', 'Pearl'), ('cubic zirconia', 'Cubic Zirconia'),
+            ('diamond', 'Diamond'),
+            ('ruby', 'Ruby'),
+            ('emerald', 'Emerald'),
+            ('sapphire', 'Sapphire'),
+            ('kundan', 'Kundan'),
+            ('polki', 'Polki'),
+            ('pearl', 'Pearl'),
+            ('cubic zirconia', 'Cubic Zirconia'),
         ]
+
         if not fields.get('stones'):
             for term, label in stone_terms:
                 if term in transcript_lower:
                     fields['stones'] = label
                     break
 
+        # Only actual design terms go into notes.
+        # Item and stone remain separate structured fields.
         design_terms = []
-        if fields.get('item'):
-            item_label = str(fields['item']).strip()
-            if item_label and item_label.lower() not in ('none', 'null'):
-                design_terms.append(item_label)
-        if fields.get('stones') and str(fields['stones']).strip().lower() not in ('none', 'null'):
-            stone_label = str(fields['stones']).strip()
-            if stone_label.lower() not in {x.lower() for x in design_terms}:
-                design_terms.append(stone_label)
-        for phrase in ('sleek', 'thin', 'very thin', 'thick', 'minimal', 'classic', 'modern', 'vintage', 'delicate', 'bold', 'plain', 'openwork', 'filigree', 'solitaire', 'halo', 'bezel', 'prong', 'engraved', 'engraving', 'matte', 'polished', 'textured'):
-            if phrase in transcript_lower and phrase.lower() not in {x.lower() for x in design_terms}:
+
+        for phrase in (
+            'sleek',
+            'thin',
+            'very thin',
+            'thick',
+            'minimal',
+            'classic',
+            'modern',
+            'vintage',
+            'delicate',
+            'bold',
+            'plain',
+            'openwork',
+            'filigree',
+            'solitaire',
+            'halo',
+            'bezel',
+            'prong',
+            'engraved',
+            'engraving',
+            'matte',
+            'polished',
+            'textured',
+        ):
+            if phrase in transcript_lower:
                 design_terms.append(phrase)
+
         existing_notes = str(fields.get('notes') or '').strip()
+
         if existing_notes:
-            existing_lower = existing_notes.lower()
-            prefix = [term for term in design_terms if term.lower() not in existing_lower]
-            if prefix:
-                fields['notes'] = '; '.join(prefix + [existing_notes])
+            fields['notes'] = existing_notes
         elif design_terms:
-            fields['notes'] = '; '.join(design_terms)
-        required = ['customer_name', 'item', 'material', 'weight', 'due_date']
-        missing = validation.get('missing_fields') or [key for key in required if fields.get(key) in (None, '')]
+            fields['notes'] = '; '.join(dict.fromkeys(design_terms))
+
+        required = [
+            'customer_name',
+            'item',
+            'material',
+            'weight',
+            'due_date',
+        ]
+
+        missing = validation.get('missing_fields') or [
+            key
+            for key in required
+            if fields.get(key) in (None, '')
+        ]
+
         validation['missing_fields'] = missing
-        validation['needs_review'] = bool(validation.get('needs_review') or missing)
-        return {'transcript': payload.transcript, 'fields': fields, 'validation': validation}
+        validation['needs_review'] = bool(
+            validation.get('needs_review') or missing
+        )
+
+        return {
+            'transcript': payload.transcript,
+            'fields': fields,
+            'validation': validation,
+        }
+
     except HTTPException:
         raise
+
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f'AI extraction failed: {exc}')
+        raise HTTPException(
+            status_code=502,
+            detail=f'AI extraction failed: {exc}'
+        )
+
 
 
 
