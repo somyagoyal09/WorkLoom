@@ -18,6 +18,7 @@ INDEX_PATH = LIBRARY_DIR / "faiss.index"
 META_PATH = LIBRARY_DIR / "metadata.json"
 IMAGE_DIR = LIBRARY_DIR / "images"
 MODEL_REPO = "Xenova/clip-vit-base-patch32"
+HF_IMAGE_BASE = "https://huggingface.co/datasets/Somya09/workloom-reference-library/resolve/main/images"
 MODEL_DIR = LIBRARY_DIR / "clip_onnx"
 
 TEXT_MODEL_PATH = MODEL_DIR / "text_model_int8.onnx"
@@ -358,7 +359,7 @@ def search_references(
                 weighted,
             )
 
-    ranked = sorted(
+        ranked = sorted(
         aggregate.items(),
         key=lambda pair: pair[1],
         reverse=True,
@@ -377,9 +378,13 @@ def search_references(
             4,
         )
 
-        item["matched_category"] = (
-            requested_category
-        )
+        item["matched_category"] = requested_category
+
+        filename = Path(
+            str(item.get("image_path", ""))
+        ).name
+
+        item["image_url"] = f"{HF_IMAGE_BASE}/{filename}"
 
         results.append(item)
 
