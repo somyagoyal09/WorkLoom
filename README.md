@@ -201,8 +201,6 @@ FastAPI provides interactive API documentation at:
 
 ## 🔗 Project Links
 
-## 🔗 Project Links
-
 🌐 **Live Application:** https://workloom-frontend.onrender.com/
 
 ⚙️ **Backend API:** https://workloom-fb22.onrender.com/
