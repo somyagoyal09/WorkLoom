@@ -46,10 +46,54 @@ retrieval provide faster access to operational and design information.
 ## 🖼️ Screenshots
 
 ### Landing Page
+## 🖼️ Screenshots
+
+### Landing Page
 
 <p align="center">
   <img src="docs/screenshots/landing-page.png" alt="WorkLoom Landing Page" width="100%"/>
 </p>
+
+<details>
+<summary><strong>View More Screenshots</strong></summary>
+
+### Owner Login
+
+<p align="center">
+  <img src="docs/screenshots/owner-login.png" alt="Owner Login" width="100%"/>
+</p>
+
+### Workshop Dashboard
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Workshop Dashboard" width="100%"/>
+</p>
+
+### Create Order
+
+<p align="center">
+  <img src="docs/screenshots/create-order.png" alt="Create Order" width="100%"/>
+</p>
+
+### Karigar Login
+
+<p align="center">
+  <img src="docs/screenshots/karigar-login.png" alt="Karigar Login" width="100%"/>
+</p>
+
+### Karigar Workboard
+
+<p align="center">
+  <img src="docs/screenshots/karigar-workboard.png" alt="Karigar Workboard" width="100%"/>
+</p>
+
+### Order Tracking
+
+<p align="center">
+  <img src="docs/screenshots/order-tracking.png" alt="Order Tracking" width="100%"/>
+</p>
+
+</details>
 
 ## 🏗️ Architecture Overview
 
