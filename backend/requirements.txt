@@ -7,7 +7,7 @@ python-multipart
 Pillow
 
 transformers
-torch
+onnxruntime
 faiss-cpu
 huggingface_hub
 numpy
