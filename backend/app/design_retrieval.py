@@ -380,9 +380,11 @@ def search_references(
 
         item["matched_category"] = requested_category
 
-        filename = Path(
-            str(item.get("image_path", ""))
-        ).name
+        filename = (
+    str(item.get("image_path", ""))
+    .replace("\\", "/")
+    .rsplit("/", 1)[-1]
+)
 
         item["image_url"] = f"{HF_IMAGE_BASE}/{filename}"
 
