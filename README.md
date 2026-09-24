@@ -43,9 +43,7 @@ retrieval provide faster access to operational and design information.
 - **Centralized Design References** — Maintain a searchable library of jewellery design references.
 - **Workshop Insights** — Track operational activity through notifications and analytics.
 
-## 🖼️ Screenshots
 
-### Landing Page
 ## 🖼️ Screenshots
 
 ### Landing Page
@@ -58,43 +56,36 @@ retrieval provide faster access to operational and design information.
 <summary><strong>View More Screenshots</strong></summary>
 
 ### Owner Login
-
 <p align="center">
   <img src="docs/screenshots/owner-login.png" alt="Owner Login" width="100%"/>
 </p>
 
-### Workshop Dashboard
-
+### Owner Dashboard
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Workshop Dashboard" width="100%"/>
+  <img src="docs/screenshots/owner-dashboard.png" alt="Owner Dashboard" width="100%"/>
 </p>
 
 ### Create Order
-
 <p align="center">
   <img src="docs/screenshots/create-order.png" alt="Create Order" width="100%"/>
 </p>
 
 ### Karigar Login
-
 <p align="center">
   <img src="docs/screenshots/karigar-login.png" alt="Karigar Login" width="100%"/>
 </p>
 
 ### Karigar Workboard
-
 <p align="center">
   <img src="docs/screenshots/karigar-workboard.png" alt="Karigar Workboard" width="100%"/>
 </p>
 
-### Order Tracking
-
+### Karigar Entry
 <p align="center">
-  <img src="docs/screenshots/order-tracking.png" alt="Order Tracking" width="100%"/>
+  <img src="docs/screenshots/karigar-entry.png" alt="Karigar Entry" width="100%"/>
 </p>
 
 </details>
-
 ## 🏗️ Architecture Overview
 
 <pre>
