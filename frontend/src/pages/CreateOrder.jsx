@@ -688,7 +688,10 @@ export default function CreateOrder({ user, onLogout }) {
         design_source: form.designSource || null,
         ai_reviewed: form.aiReviewed,
         ai_missing_fields: form.aiMissingFields,
-        ai_confidence: form.aiConfidence,
+        ai_confidence:
+  form.aiConfidence && typeof form.aiConfidence === 'object' && !Array.isArray(form.aiConfidence)
+    ? form.aiConfidence
+    : { overall: Number(form.aiConfidence) || 0 },
         design_concept: form.designConcept,
         stage: 'Design Approved',
       });
