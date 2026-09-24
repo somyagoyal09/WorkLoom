@@ -9,6 +9,7 @@
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" />
   <img src="https://img.shields.io/badge/CLIP-412991?style=flat-square" />
   <img src="https://img.shields.io/badge/FAISS-0467DF?style=flat-square" />
+  
 </p>
 
 <img src="frontend/public/logo-mark.png" alt="WorkLoom Logo" width="120"/>
@@ -30,12 +31,12 @@ order workflows, karigar coordination, production tracking and jewellery
 design intelligence in one place.
 
 It helps workshop users manage an order from design intake and assignment
-through production stages, while AI-assisted voice input and visual design
+through production stages, while AI-assisted voice input and semantic design
 retrieval provide faster access to operational and design information.
 
 ## ✨ Key Features
 
-- **AI Design Retrieval** — Find visually similar jewellery references using CLIP embeddings and FAISS similarity search.
+- **AI Design Retrieval** — Find relevant jewellery design references using CLIP-based embeddings and FAISS similarity search.
 - **Voice-Assisted Input** — Convert voice-based workshop input into structured information.
 - **Structured Order Workflow** — Organize jewellery orders across defined production stages.
 - **Karigar-Specific Workspaces** — Provide assigned work and relevant order visibility to workshop members.
@@ -62,12 +63,15 @@ retrieval provide faster access to operational and design information.
    Order Management    Workshop Management    AI Services
    (Orders, Stages,    (Karigar, Customers,   (Voice AI,
     Tracking)           Issues, Team)          Design Retrieval)
-          │                   │             ┌─────┴─────┐
-          │                   │             ▼           ▼
-          │                   │            CLIP        FAISS
-          │                   │             └─────┬─────┘
+          │                   │              ┌─────┴─────┐
+          │                   │              ▼           ▼
+          │                   │       CLIP ViT-B/32      ONNX Runtime
+          │                   │            └──────┬────────┘
           │                   │                   ▼
-          │                   │             Similar Designs
+          │                   │                 FAISS
+          │                   │              └─────┬─────┘
+          │                   │                    ▼
+          │                   │              Similar Designs
           └───────────────────┼───────────────────┘
                               ▼
                        Application Results
@@ -89,7 +93,7 @@ WorkLoom/
 │   │   ├── config.py                # Environment configuration
 │   │   ├── database.py              # MongoDB connection & indexes
 │   │   ├── auth.py                  # Authentication & authorization
-│   │   ├── design_retrieval.py      # CLIP + FAISS design retrieval
+│   │   ├── design_retrieval.py      # CLIP + ONNX + FAISS retrieval
 │   │   ├── models/
 │   │   │   └── order.py             # Order schemas & validation
 │   │   └── routes/
@@ -160,8 +164,12 @@ Prepare the AI reference library:
     cd ../backend
     python setup_reference_library.py
 
-This prepares the jewellery reference images, CLIP embeddings and FAISS
-index required for design retrieval.
+ This prepares the jewellery reference images, generates CLIP-based image
+embeddings and builds the FAISS index required for design retrieval.
+
+> **AI Reference Library:** The prepared reference library is maintained
+> separately from user uploads and contains the images and embeddings used
+> for semantic design retrieval.
 
 ## ▶️ Running the Application
 
@@ -193,7 +201,13 @@ FastAPI provides interactive API documentation at:
 
 ## 🔗 Project Links
 
+## 🔗 Project Links
+
 🌐 **Live Application:** https://workloom-frontend.onrender.com/
+
+⚙️ **Backend API:** https://workloom-fb22.onrender.com/
+
+📖 **API Documentation:** https://workloom-fb22.onrender.com/docs
 
 💻 **GitHub Repository:** https://github.com/somyagoyal09/WorkLoom
 
